@@ -118,7 +118,6 @@ def check_entry(cursor: sqlite3.Cursor,
 def check_data(cursor: sqlite3.Cursor,
                entry_id: int,
                id_type: str):
-    pass
 
     data_query = f'''SELECT {id_type} FROM Data WHERE {id_type}='{entry_id}';'''
 
@@ -232,8 +231,20 @@ def search_study(cursor: sqlite3.Cursor,
 
     return study
 
-# returns all details of data as a list
-# handles variable inputs as queries
+
+
+# dynamically adds variables to query term depending on if they are given or None
+def create_dynamic_query(query: str, dynamic_vars: dict):
+
+    for name, var in dynamic_vars.items():
+        if var is not None:
+            query += f''' AND {name}={str(var)}'''
+
+    return query
+
+
+
+# returns all details of data as a list, handles variable inputs as queries
 def search_data(cursor: sqlite3.Cursor,
                 sensor_id: int, 
                 study_id: int,
@@ -241,13 +252,15 @@ def search_data(cursor: sqlite3.Cursor,
                 value: float=None,
                 timestamp: str=None):
     
-    entry_query = f'''SELECT * 
-    FROM Data 
-    WHERE study_id='{study_id}'
-    AND sensor_id='{sensor_id}'
-    AND (location_id IS NULL OR location_id = '{location_id}')
-    AND (value IS NULL OR value = '{str(value)}')
-    AND (timestamp IS NULL OR timestamp = '{timestamp}');'''
+    entry_query = f'''SELECT * FROM Data 
+    WHERE study_id={study_id}
+    AND sensor_id={sensor_id}'''
+
+    optional_vars = {'location_id': location_id, 
+                     'value': value, 
+                     'timestamp': timestamp}
+    
+    entry_query = create_dynamic_query(entry_query, optional_vars)
 
     data = list(cursor.execute(entry_query).fetchall())
 

@@ -11,7 +11,7 @@ import mqtt_funcs
 # receiver then publishes sql data to sql/send_data channel
 # sender on_message prints out data
 
-# TODO retrieve user data (study, etc.) and send to receiver, which will then set its userdata to same
+# TODO retrieve user data through log in (study, etc.) and send to receiver, which will then set its userdata to same?
 
 # VARIABLES
 mqtt_broker = "149.165.159.142"
@@ -52,11 +52,14 @@ def main():
         }
 
         print("Sending Temperature Data:", temperature_data)
-        print("Sending TEER Data:", teer_data)
 
         client.publish(mqtt_topic_prefix + 'sensor_data/temperature', json.dumps(temperature_data))
 
+        print("Sending TEER Data:", teer_data)
+
         client.publish(mqtt_topic_prefix + 'evom_data/teer', json.dumps(teer_data))
+
+        print("Retrieving Teer Data")
 
         client.publish(mqtt_topic_prefix + 'sql/retrieve_data', json.dumps(sensor_data))
 
